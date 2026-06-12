@@ -1,0 +1,17 @@
+-- Cart Service seed data (Task 8.2.4)
+
+INSERT INTO users (id, name, email)
+VALUES
+  ('00000000-0000-0000-0000-000000000001', 'Bubalehich', 'bubalehich@example.com'),
+  ('00000000-0000-0000-0000-000000000002', 'Frodo', 'frodo@shire.example.com')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO carts (id, user_id, status)
+VALUES
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'OPEN')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO cart_items (cart_id, product_id, count) VALUES
+  ('11111111-1111-1111-1111-111111111111', '7e247b9f-ea77-4428-ba96-ef629ae4ef8a', 2),
+  ('11111111-1111-1111-1111-111111111111', 'b539d879-337e-4b96-97fb-582c4623cc20', 1)
+ON CONFLICT DO NOTHING;

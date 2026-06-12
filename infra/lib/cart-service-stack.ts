@@ -21,6 +21,7 @@ function buildLambdaAsset(): lambda.AssetCode {
         tryBundle(outputDir: string): boolean {
           execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
           execSync(`xcopy /E /I /Y "${path.join(ROOT, 'dist', 'src')}" "${outputDir}"`, { stdio: 'inherit' });
+          execSync(`xcopy /E /I /Y "${path.join(ROOT, 'db')}" "${path.join(outputDir, 'db')}"`, { stdio: 'inherit' });
           fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(outputDir, 'package.json'));
           execSync('npm install --omit=dev --legacy-peer-deps --ignore-scripts', {
             cwd: outputDir,
