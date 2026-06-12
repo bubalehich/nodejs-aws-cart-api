@@ -8,6 +8,8 @@ export class UsersService {
 
   constructor() {
     this.users = {};
+    const id = '00000000-0000-0000-0000-000000000001';
+    this.users[id] = { id, name: 'bubalehich', password: 'TEST_PASSWORD' };
   }
 
   findOne(name: string): User {
