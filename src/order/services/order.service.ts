@@ -1,50 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { Order } from '../models';
-import { CreateOrderPayload, OrderStatus } from '../type';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
+import { OrderEntity } from '../../database/entities/order.entity';
+import { CreateOrderPayload } from '../type';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  constructor(
+    @InjectRepository(OrderEntity)
+    private readonly orderRepo: Repository<OrderEntity>,
+  ) {}
 
-  getAll() {
-    return Object.values(this.orders);
+  async getAll(): Promise<OrderEntity[]> {
+    return this.orderRepo.find();
   }
 
-  findById(orderId: string): Order {
-    return this.orders[orderId];
+  async findById(id: string): Promise<OrderEntity | null> {
+    return this.orderRepo.findOne({ where: { id } });
   }
 
-  create(data: CreateOrderPayload) {
-    const id = randomUUID() as string;
-    const order: Order = {
-      id,
-      ...data,
-      statusHistory: [
-        {
-          comment: '',
-          status: OrderStatus.Open,
-          timestamp: Date.now(),
-        },
-      ],
-    };
-
-    this.orders[id] = order;
-
-    return order;
+  async create(data: CreateOrderPayload, manager?: EntityManager): Promise<OrderEntity> {
+    const repo = manager ? manager.getRepository(OrderEntity) : this.orderRepo;
+    const order = repo.create({
+      user_id: data.userId,
+      cart_id: data.cartId,
+      delivery: data.address as unknown as Record<string, unknown>,
+      payment: null,
+      comments: null,
+      status: 'OPEN',
+      total: data.total,
+    });
+    return repo.save(order);
   }
 
-  // TODO add  type
-  update(orderId: string, data: Order) {
-    const order = this.findById(orderId);
-
-    if (!order) {
-      throw new Error('Order does not exist.');
-    }
-
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
-    };
+  async update(id: string, partial: Partial<OrderEntity>): Promise<OrderEntity | null> {
+    await this.orderRepo.update({ id }, partial);
+    return this.findById(id);
   }
 }
