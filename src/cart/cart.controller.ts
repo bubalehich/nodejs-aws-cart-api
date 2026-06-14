@@ -25,18 +25,25 @@ export class CartController {
     private orderService: OrderService,
   ) {}
 
+  private shape(items: { product_id: string; count: number }[] | undefined) {
+    return (items ?? []).map((item) => ({
+      product: { id: item.product_id },
+      count: item.count,
+    }));
+  }
+
   @UseGuards(BasicAuthGuard)
   @Get()
   async findUserCart(@Req() req: AppRequest) {
     const cart = await this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
-    return cart.items ?? [];
+    return this.shape(cart.items);
   }
 
   @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body: PutCartPayload) {
     const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body);
-    return cart.items ?? [];
+    return this.shape(cart.items);
   }
 
   @UseGuards(BasicAuthGuard)
