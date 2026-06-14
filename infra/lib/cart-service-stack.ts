@@ -118,18 +118,17 @@ export class CartServiceStack extends cdk.Stack {
 
     const api = new apigateway.RestApi(this, 'CartServiceApi', {
       restApiName: 'Cart Service',
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: ['*'],
-      },
       binaryMediaTypes: ['*/*'],
     });
 
-    api.root.addProxy({
-      defaultIntegration: new apigateway.LambdaIntegration(cartApi),
+    const lambdaIntegration = new apigateway.LambdaIntegration(cartApi);
+    const proxy = api.root.addProxy({
+      defaultIntegration: lambdaIntegration,
       anyMethod: true,
     });
+
+    // REST API "ANY" excludes OPTIONS — route OPTIONS through Lambda so NestJS's enableCors() responds.
+    proxy.addMethod('OPTIONS', lambdaIntegration);
 
     new cdk.CfnOutput(this, 'CartApiUrl', { value: api.url });
     new cdk.CfnOutput(this, 'DbEndpoint', { value: db.dbInstanceEndpointAddress });

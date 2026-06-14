@@ -14,7 +14,12 @@ let cachedHandler: Handler;
 async function bootstrap(): Promise<Handler> {
   const expressApp = express();
   const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-  app.enableCors({ origin: true });
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
   app.use(helmet());
   await app.init();
   return serverlessExpress({ app: expressApp });
